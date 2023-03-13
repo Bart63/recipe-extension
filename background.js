@@ -1,6 +1,22 @@
-console.log("Background is working");
+function checkURL(tab) {
+  if (tab.url && tab.url.includes('localhost')) {
+    chrome.storage.local.set({ 'isOrderAvailable': true })
+    chrome.action.setIcon({path: "images/icon-16.png", tabId: tab.id});
+  } else {
+    chrome.storage.local.set({ 'isOrderAvailable': false })
+    chrome.action.setIcon({path: "images/icon-disabled-16.png", tabId: tab.id});
+  }
+}
 
-chrome.tabs.onUpdated.addListener((tabId, tab) => {
-  console.log("New site: ", tab.url);    
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+  if (changeInfo.status == 'complete') {
+    checkURL(tab);
+  }
 });
-  
+
+
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+  chrome.tabs.get(activeInfo.tabId, function(tab) {
+    checkURL(tab);
+  });
+});
