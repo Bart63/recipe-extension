@@ -8,6 +8,7 @@ function checkURL(tab) {
     }
 }
 
+
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (changeInfo.status == 'complete') {
         checkURL(tab);
@@ -20,3 +21,27 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
         checkURL(tab);
     });
 });
+
+
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+    let ingredients = (await chrome.storage.local.get(["ingredients"])).ingredients;
+    if (sender.tab && sender.tab.id === -1 && message.type === 'sendPostRequest') {
+        fetch('http://localhost/order', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ingredients)
+        })
+        .then(() => {
+            console.log('POST request sent successfully');
+            sendResponse({ success: true });
+        })
+        .catch(error => {
+            console.log("ERRO")
+            console.error(error);
+            sendResponse({ success: false });
+        });
+    }
+    return true;
+  });

@@ -1,6 +1,5 @@
 const name_quantity = (ing) => {
     const firstNumber = ing.match(/[0-9]+/);
-    console.log(ing)
     if (firstNumber == null) {
         return ing.substring(0, ing.lastIndexOf(' '))
     }
@@ -27,13 +26,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             title = 'No recipe here!';
         } else {
             ingredients = ingredients.map((x => [name_quantity(x)]))
+            chrome.storage.local.set({ 'ingredients': ingredients })
             let ingTable = document.getElementsByClassName('ingredients')[0]
             ingTable.removeAttribute('hidden')
             ingredients.forEach((ing) => {
                 ing = ing[0]
                 let ingName = ing
                 let ingQuantity = ''
-                console.log(typeof ing)
                 if (typeof ing == 'object') {
                     ingName = ing[0]
                     ingQuantity = ing[1]
@@ -41,6 +40,16 @@ document.addEventListener('DOMContentLoaded', async function () {
                 ingTable.innerHTML += `<tr><td>${ingName}</td><td>${ingQuantity}</td></tr>`
             })
             document.getElementsByClassName('submit')[0].innerHTML = '<button>Add to basket</button>'
+            const sendRequestButton = document.getElementById('submitButton');
+            sendRequestButton.addEventListener('click', () => {
+                chrome.runtime.sendMessage({ type: 'sendPostRequest' }, response => {
+                    if (response.success) {
+                        console.log('POST request was successful');
+                    } else {
+                        console.error('POST request failed');
+                    }
+                });
+            });
         }
     } else {
         title = 'This site does not support ordering groceries';
