@@ -1,16 +1,18 @@
 (() => {
 
-chrome.runtime.onMessage.addListener((obj, sender, response) => {
+chrome.runtime.onMessage.addListener((obj, sender) => {
     const { type } = obj;
 
     if (type !== "RECIPE_PAGE") {
         return;
     }
-    const ingredientDiv = document.getElementsByClassName('ingredients');
+    let ingredientDiv = document.getElementsByClassName('ingredients')[0];
     if (ingredientDiv) {
-        let el = ingredientDiv
-        console.log(el.length)
-        console.log(el)
+        let ingredientsList = [...ingredientDiv.querySelectorAll('li')]
+        ingredientsList = ingredientsList.map((x => x.innerHTML))
+        chrome.storage.local.set({ 'ingredients': ingredientsList })
+    } else {
+        chrome.storage.local.set({ 'ingredients': [] })
     }
 });
 
